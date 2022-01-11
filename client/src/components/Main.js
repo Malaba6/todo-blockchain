@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 import {
-  Box, Grid, Typography
+  Box, Grid, Slide, Typography, Collapse
 } from "@mui/material";
-import { BlurCircular
- } from "@mui/icons-material";
- import moment from 'moment'
- import {ReactCSSTransitionGroup} from 'react-addons-transition-group'
+import { BlurCircular } from "@mui/icons-material";
+import moment from 'moment'
+import { TransitionGroup } from 'react-transition-group'
+import { v4 as uuid } from 'uuid'
 import Task from "./Task";
 
 const Main = () => {
@@ -13,28 +13,54 @@ const Main = () => {
   const [date, setDate] = useState(new Date())
   const [task, setTask] = useState('')
   const [tasks, setTasks] = useState([])
+  const [when, setWhen] = useState({})
 
-  const menuLabels = [
-    {
-      label: "No list",
-      value: 1
+  const menuLabels = Object.keys(when).map((w, i) => {
+    return {
+      label: w,
+      value: w
     }
-  ]
+  }) 
+  console.log(selectedItem)
 
   const handleMenuChange = e => setSelectedItem(e.target.value)
 
-  const handleDateChange = useCallback(newDate =>setDate(newDate), [])
+  const handleDateChange = useCallback(newDate => setDate(newDate), [])
 
   const handleTaskChange = e => setTask(e.target.value)
 
+  const sortList = (list) => list.sort((a, b) => b.order - b.order)
+
   const handleAddTask = () => {
-    setTasks([...tasks, { 
-      id: tasks.length + 1, 
-      task: task,
-      date: date,
-      isDone: false,
-    }].sort((a, b) => b.date - a.date))
-    setTask('')
+    if (task) {
+      const time = date < new Date() ? new Date() : date
+      const day = moment(time).calendar()
+      const timeLapse = moment(time).fromNow()
+  
+      const newTask = {
+        id: uuid(),
+        task,
+        date: time,
+        isDone: false,
+      }
+      if (day.indexOf('Today') !== -1) setWhen({
+        ...when,
+        today: when?.today ? sortList([...when.today, newTask]) : [newTask]
+      })
+      else if (day.indexOf('Tomorrow') !== -1) setWhen({
+        ...when,
+        tomorrow: when?.tomorrow ? sortList([...when.tomorrow, newTask]) : [newTask]
+      })
+      else setWhen({
+        ...when,
+        [timeLapse]: when[timeLapse]
+          ? sortList([...when[timeLapse], newTask]) 
+          : [newTask]
+      })
+
+      setTasks(sortList([...tasks, newTask]))
+      setTask('')
+    }
   }
 
   const getGreetings = (hour) => {
@@ -85,22 +111,21 @@ const Main = () => {
           handleDateChange={handleDateChange}
           handleAddTask={handleAddTask}
           menuLabels={menuLabels} />
-        <ReactCSSTransitionGroup  
-          transitionEnterTimeout={500}
-          transitionLeaveTimeout={300}
-          transitionName="name">
+        <TransitionGroup>
           {tasks.map(({id, task, date, isDone}) => 
-            <Task
-              key={id}
-              id={id}
-              task={task}
-              date={date}
-              isDone={isDone}
-              tasks={tasks}
-              setTasks={setTasks}
-              handleDateChange={handleDateChange} />
-          )}
-        </ReactCSSTransitionGroup>
+            <Collapse key={id}>
+              <Task
+                key={id}
+                id={id}
+                task={task}
+                date={date}
+                isDone={isDone}
+                tasks={tasks}
+                setTasks={setTasks}
+                handleDateChange={handleDateChange} />
+              </Collapse>
+            )}
+        </TransitionGroup>
       </Box>
     </Box>
   )
