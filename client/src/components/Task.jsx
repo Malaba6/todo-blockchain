@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import {
   Box, Checkbox, Container, Divider, FormControl,
   IconButton, InputBase, InputLabel, ListItem,
+  MenuItem,
   Select, Typography, Zoom
 } from "@mui/material";
 // import { AddTask, CheckBoxOutlineBlankRounded } from "@mui/icons-material";
@@ -89,36 +90,37 @@ const Task = ({
         }
         {isNewTask && (
           <>
-          <Divider orientation='vertical'
-          sx={{
-            m: 1,
-            mr: 2,
-            height: 30,
-            display: {xs: 'none', md: 'block'}
-          }} />
-        <FormControl
-          sx={{
-            display: {xs: 'none', md: 'block'}
-          }}>
-          <InputLabel id="my-todo-list">Todos</InputLabel>
-          <Select
-            labelId="my-todo-list"
-            id="my-todo-menu"
-            defaultValue={'today'}
-            value={selectedItem}
-            label="todo"
-            onChange={handleMenuChange}
-            sx={{
-              p: 0,
-              height: 40,
-            }}>
-            {menuLabels.map(({ label, value }) => (
-              <ListItem key={value} value={value}>
-                {label}
-              </ListItem>
-            ))}
-          </Select>
-        </FormControl></>
+            <Divider orientation='vertical'
+              sx={{
+                m: 1,
+                mr: 2,
+                height: 30,
+                display: {xs: 'none', md: 'block'}
+              }} />
+            <FormControl
+              sx={{
+                display: {xs: 'none', md: 'block'}
+              }}>
+              <InputLabel id="my-todo-list">Todos</InputLabel>
+              <Select
+                labelId="my-todo-list"
+                id="my-todo-menu"
+                defaultValue={1}
+                value={selectedItem}
+                label="todo"
+                onChange={handleMenuChange}
+                sx={{
+                  p: 0,
+                  height: 40,
+                }}>
+                {menuLabels.map(({ label, value }) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
         )}
         
       </Container>

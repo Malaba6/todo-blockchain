@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box, Grid, Slide, Typography, Collapse
 } from "@mui/material";
@@ -14,22 +14,28 @@ const Main = () => {
   const [task, setTask] = useState('')
   const [tasks, setTasks] = useState([])
   const [when, setWhen] = useState({})
+  const [menuLabels, setMenuLabels] = useState([{
+    label: 'Sort by Date',
+    value: 1
+  }])
 
-  const menuLabels = Object.keys(when).map((w, i) => {
-    return {
-      label: w,
-      value: w
-    }
-  }) 
-  console.log(selectedItem)
+  const handleMenuChange = e => {
+    setSelectedItem(e.target.value)
+    const item = menuLabels.find(l => l.value === e.target.value)
+    const { label } = item
 
-  const handleMenuChange = e => setSelectedItem(e.target.value)
+    setTasks(when[label])
+  }
 
   const handleDateChange = useCallback(newDate => setDate(newDate), [])
 
   const handleTaskChange = e => setTask(e.target.value)
 
-  const sortList = (list) => list.sort((a, b) => b.order - b.order)
+  // Sort tasks by date
+  const sortList = (list) => list.sort((a, b) => b.date - b.date)
+
+  // Check whether task is already in list
+  const isInMenu = (item) => menuLabels.find(l => l.value === item)
 
   const handleAddTask = () => {
     if (task) {
@@ -43,20 +49,38 @@ const Main = () => {
         date: time,
         isDone: false,
       }
-      if (day.indexOf('Today') !== -1) setWhen({
-        ...when,
-        today: when?.today ? sortList([...when.today, newTask]) : [newTask]
-      })
-      else if (day.indexOf('Tomorrow') !== -1) setWhen({
-        ...when,
-        tomorrow: when?.tomorrow ? sortList([...when.tomorrow, newTask]) : [newTask]
-      })
-      else setWhen({
-        ...when,
-        [timeLapse]: when[timeLapse]
-          ? sortList([...when[timeLapse], newTask]) 
-          : [newTask]
-      })
+
+      if (day.indexOf('Today') !== -1) {
+        setWhen({
+          ...when,
+          Today: when?.Today ? sortList([...when.Today, newTask]) : [newTask]
+        })
+
+        !isInMenu('Today') && setMenuLabels([...menuLabels, {
+          label: 'Today', value: menuLabels.length + 1
+        }])
+      } else if (day.indexOf('Tomorrow') !== -1) {
+        setWhen({
+          ...when,
+          Tomorrow: when?.Tomorrow ? sortList([...when.Tomorrow, newTask]) : [newTask]
+        })
+
+        !isInMenu("Tomorrow") && setMenuLabels([...menuLabels, {
+          label: 'Tomorrow', value: menuLabels.length + 1
+        }])
+      } else {
+        setWhen({
+          ...when,
+          [timeLapse]: when[timeLapse]
+            ? sortList([...when[timeLapse], newTask]) 
+            : [newTask]
+        })
+
+        !isInMenu(timeLapse) && setMenuLabels([...menuLabels, {
+          label: timeLapse, value: menuLabels.length + 1
+        }])
+
+      }
 
       setTasks(sortList([...tasks, newTask]))
       setTask('')

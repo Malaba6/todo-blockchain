@@ -7,14 +7,18 @@ import {  ThemeProvider } from '@mui/material/styles'
 import AdapterMoment from '@mui/lab/AdapterMoment'
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import theme from './style/theme'
+import { CssBaseline } from '@mui/material'
 
+const container = document.getElementById('root')
+const root = ReactDOM.createRoot(container)
 
-ReactDOM.render(
+root.render(
   <ThemeProvider theme={theme}>
     <LocalizationProvider dateAdapter={AdapterMoment}>
+      <CssBaseline />
       <App />
     </LocalizationProvider>
-  </ThemeProvider>, document.getElementById('root'));
+  </ThemeProvider>);
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
