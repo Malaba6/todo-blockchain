@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import Web3 from "web3"
 import Web3Modal from "web3modal"
 
@@ -5,8 +6,7 @@ import Web3Modal from "web3modal"
 const useNetwork = ({ setMsg }) => {
   const [network, setNetwork] = useState('---')
   const [web3, setWeb3] = useState()
-  const [accounts, setAccount] = useState('---')
-  const [contract, setContract] = useState()
+  const [account, setAccount] = useState('---')
   const [wallet, setWallet] = useState()
   const [isConnected, setIsConnected] = useState(false)
 
@@ -28,9 +28,9 @@ const useNetwork = ({ setMsg }) => {
 
     const isLocal = !provider.isMetaMask && (window.location.hostname === '127.0.0.1')
 
-    isLocal && setMsg({
-      info: `Please connect to local Ganache: ${fallbackGanasheProviderUrl}`
-    })
+    isLocal && setMsg([
+      'info', `Please connect to local Ganache: ${fallbackGanasheProviderUrl}`
+    ])
 
     const provider_ = isLocal ? fallbackGanasheProviderUrl : provider
     const web3_ = new Web3(provider_)
@@ -41,13 +41,13 @@ const useNetwork = ({ setMsg }) => {
     setWallet(nodeInfo.split(' ', 1)[0])
 
     const chainId = await web3_.eth.getChainId()
-    const networdId = await web3_.eth.net.getId()
+    const networkId = await web3_.eth.net.getId()
 
     const networkType = await web3_.eth.net.getNetworkType()
       .catch(() => 'Unknown')
     setWeb3(web3_)
     
-    setNetwork(`${chainId} ${networkId} ${networkType}`)
+    setNetwork(`${chainId} ${networkId} (${networkType})`)
 
     setupAccount(web3_)
   }
@@ -67,7 +67,7 @@ const useNetwork = ({ setMsg }) => {
       web3.currentProvider.close()
       setIsConnected(false)
     }
-    web3.clearCacheProvider()
+    // web3.clearCachedProvider()
 
     setNetwork('---')
     setWeb3(undefined)
@@ -75,7 +75,7 @@ const useNetwork = ({ setMsg }) => {
     setIsConnected(false)
   }
 
-  return [{ network, web3, accounts, contract, wallet, isConnected }, connectNetwork, disconnectNetwork]
+  return [{ network, web3, account, wallet, isConnected }, connectNetwork, disconnectNetwork]
 }
 
 export default useNetwork

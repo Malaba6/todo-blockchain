@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { Grid, TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
+import { Send } from '@mui/icons-material'
 
 export default function ButtonAppBar({
   wallet, network, account, isConnected,
@@ -26,14 +27,20 @@ export default function ButtonAppBar({
     setLoading(false)
   }
 
+  const handleDisconnect = () => {
+    setLoading(true)
+    disconnect()
+    setLoading(false)
+  }
+
   const connect = () => {
     try {
       connectNetwork()
       setIsConnBtnOn(false)
     } catch (err) {
       err
-        ? setMsg({info: 'Something went wrong!'})
-        : setMsg({error: 'An error occured while connecting to the network!'})
+        ? setMsg(['info', 'Something went wrong!'])
+        : setMsg(['error', 'An error occured while connecting to the network!'])
     }
   }
 
@@ -43,8 +50,8 @@ export default function ButtonAppBar({
       setIsConnBtnOn(true)
     } catch (err) {
       err
-        ? setMsg({info: 'Something went wrong!'})
-        : setMsg({error: 'An error occured while disconnecting from the network!'})
+        ? setMsg(['info', 'Something went wrong!'])
+        : setMsg(['error', 'An error occured while disconnecting to the network!'])
     }
   }
 
@@ -106,8 +113,9 @@ export default function ButtonAppBar({
                   color="inherit"
                   variant='outlined'
                   loading={loading}
-                  onclick={handleConnect}
-                  loadingPosition='end'
+                  // endIcon={<Send />}
+                  onClick={isConnBtnOn ? handleConnect : handleDisconnect}
+                  // loadingPosition='end'
                   sx={{
                     color: 'secondary.main',
                     pl: 3,

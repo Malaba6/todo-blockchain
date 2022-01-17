@@ -8,7 +8,7 @@ import { TransitionGroup } from 'react-transition-group'
 import { v4 as uuid } from 'uuid'
 import Task from "./Task";
 
-const Main = () => {
+const Main = ({ createTask }) => {
   const [selectedItem, setSelectedItem] = useState()
   const [date, setDate] = useState(new Date())
   const [task, setTask] = useState('')
@@ -37,7 +37,7 @@ const Main = () => {
   // Check whether task is already in list
   const isInMenu = (item) => menuLabels.find(l => l.value === item)
 
-  const handleAddTask = () => {
+  const handleAddTask = async() => {
     if (task) {
       const time = date < new Date() ? new Date() : date
       const day = moment(time).calendar()
@@ -83,6 +83,7 @@ const Main = () => {
       }
 
       setTasks(sortList([...tasks, newTask]))
+      await createTask(task)
       setTask('')
     }
   }
