@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { SnackbarProvider } from 'notistack'
 import TodoListContract from "./contracts/TodoList.json"
 import getWeb3 from "./getWeb3"
@@ -18,7 +18,13 @@ const App = () => {
     web3,
     wallet
   }, connectNetwork, disconnectNetwork] = useNetwork({ setMsg })
-  const [{ createTask }] = useContract({ web3, account, setMsg })
+  const [{ createTask, setTasks }, tasks] = useContract({ web3, account, setMsg })
+
+  const siledTasks = tasks.slice(1)
+
+  // useEffect(() => {
+  //   console.log('tasks: ---APP ', tasks)
+  // }, [tasks])
 
   return (
     <div className="App">
@@ -26,7 +32,7 @@ const App = () => {
         wallet, account, network, connectNetwork,
         disconnectNetwork, setMsg
       }} />
-      <Main {...{ createTask }} />
+      <Main {...{ createTask, setTasks }} tasks={siledTasks} />
       <SnackbarProvider maxSnack={3}>
         <Notify {...{ msg }} />
       </SnackbarProvider>

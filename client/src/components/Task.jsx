@@ -5,19 +5,31 @@ import {
   MenuItem,
   Select, Typography, Zoom
 } from "@mui/material";
-// import { AddTask, CheckBoxOutlineBlankRounded } from "@mui/icons-material";
 import { DateTimePicker } from "@mui/lab";
-import moment from 'moment';
+import moment from 'moment'
 
 const Task = ({
   isNewTask, selectedItem, task, isDone, setTasks,
   date, handleTaskChange, handleMenuChange, tasks,
-  handleDateChange, menuLabels, handleAddTask, id
+  handleDateChange, menuLabels, handleAddTask, id,
+  newTasks: _tasks
 }) => {
   const hanleTaskDone = () =>
     setTasks(tasks.map(t => t.id === id 
       ? { ...t, isDone: !isDone } 
-      : t).sort((a, b) => b.id - a.id));
+      : t).sort((a, b) => b.id - a.id))
+
+  useEffect(() => {
+    // console.log("****** ", _tasks);
+    if (_tasks) {
+      _tasks.forEach(t => {
+        if (t.id !== '0') {
+        // Turn timestamp into date
+        const newDate = new Date(parseInt(t.date))
+        console.log("****** ", t.date, newDate);
+      }})
+    }
+  }, [_tasks])
 
   useEffect(() => {
     handleDateChange(new Date())

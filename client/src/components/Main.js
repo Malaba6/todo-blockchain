@@ -8,16 +8,36 @@ import { TransitionGroup } from 'react-transition-group'
 import { v4 as uuid } from 'uuid'
 import Task from "./Task";
 
-const Main = ({ createTask }) => {
+const Main = ({ createTask, tasks, setTasks }) => {
   const [selectedItem, setSelectedItem] = useState()
   const [date, setDate] = useState(new Date())
   const [task, setTask] = useState('')
-  const [tasks, setTasks] = useState([])
+  // const [tasks, setTasks] = useState(_tasks || [])
   const [when, setWhen] = useState({})
+  console.log('When: ', when)
   const [menuLabels, setMenuLabels] = useState([{
     label: 'Sort by Date',
     value: 1
   }])
+
+  useEffect(() => {
+    // const sameDateTasks = []
+    // collect all tasks with same when
+    const tempObj = {}
+  
+    tasks.forEach(task_ => {
+      const  whn = task_.when
+      const whenValues = when[task_.when]
+      if (whenValues) {
+        tempObj[whn] = [...whenValues, task_]
+      } else {
+        tempObj[whn] = [task_]
+      }
+
+    })
+    setWhen(tempObj)
+    // setTasks(sortList([...tasks]))
+  }, [tasks])
 
   const handleMenuChange = e => {
     setSelectedItem(e.target.value)
@@ -42,6 +62,7 @@ const Main = ({ createTask }) => {
       const time = date < new Date() ? new Date() : date
       const day = moment(time).calendar()
       const timeLapse = moment(time).fromNow()
+      let when_ = ''
   
       const newTask = {
         id: uuid(),
@@ -51,6 +72,7 @@ const Main = ({ createTask }) => {
       }
 
       if (day.indexOf('Today') !== -1) {
+        when_ = 'Today'
         setWhen({
           ...when,
           Today: when?.Today ? sortList([...when.Today, newTask]) : [newTask]
@@ -60,6 +82,7 @@ const Main = ({ createTask }) => {
           label: 'Today', value: menuLabels.length + 1
         }])
       } else if (day.indexOf('Tomorrow') !== -1) {
+        when_ = 'Tomorrow'
         setWhen({
           ...when,
           Tomorrow: when?.Tomorrow ? sortList([...when.Tomorrow, newTask]) : [newTask]
@@ -69,6 +92,7 @@ const Main = ({ createTask }) => {
           label: 'Tomorrow', value: menuLabels.length + 1
         }])
       } else {
+        when_ = timeLapse
         setWhen({
           ...when,
           [timeLapse]: when[timeLapse]
@@ -81,9 +105,11 @@ const Main = ({ createTask }) => {
         }])
 
       }
-
+      newTask[when_] = when_
       setTasks(sortList([...tasks, newTask]))
-      await createTask(task)
+      const dateInSeconds = moment(time).unix()
+      console.log('dateInSeconds: ', dateInSeconds)
+      await createTask(task, dateInSeconds, when_)
       setTask('')
     }
   }
@@ -137,18 +163,20 @@ const Main = ({ createTask }) => {
           handleAddTask={handleAddTask}
           menuLabels={menuLabels} />
         <TransitionGroup>
-          {tasks.map(({id, task, date, isDone}) => 
-            <Collapse key={id}>
-              <Task
-                key={id}
-                id={id}
-                task={task}
-                date={date}
-                isDone={isDone}
-                tasks={tasks}
-                setTasks={setTasks}
-                handleDateChange={handleDateChange} />
-              </Collapse>
+          {tasks.map(({id, content, date, isDone}) => id !== '0'
+            ? (<Collapse key={id}>
+                <Task
+                  key={id}
+                  id={id}
+                  task={content}
+                  date={new Date(parseInt(date))}
+                  isDone={isDone}
+                  tasks={tasks}
+                  setTasks={setTasks}
+                  // newTasks={_tasks || []}
+                  handleDateChange={handleDateChange} />
+                </Collapse>)
+            : null
             )}
         </TransitionGroup>
       </Box>
