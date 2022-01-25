@@ -10,24 +10,21 @@ contract TodoList {
     bool isDone;
     uint date;
     uint dateOfCompletion;
-    string when;
   }
 
-  event TaskCreated(uint id, string content, bool isDone, uint date, string when);
+  event TaskCreated(uint id, string content, bool isDone, uint date);
+  event TaskChanged(uint id, bool isDone, uint dateOfCompletion);
+  event TaskDeleted(uint id);
 
   mapping(uint => Task) tasks;
 
-  function createTask (string memory _content, uint _date, string memory _when) public {
-    // uint _now = block.timestamp;
-    tasks[taskCount] = Task(taskCount, _content, false, _date, 0, _when);
+  function createTask (string memory _content, uint _date) public {
+  
+    tasks[taskCount] = Task(taskCount, _content, false, _date, 0);
     taskIds.push(taskCount);
     taskCount++;
 
-    emit TaskCreated(taskCount, _content, false, _date, _when);
-  }
-
-  function getTaskIds () public view returns (uint[] memory) {
-    return taskIds;
+    emit TaskCreated(taskCount, _content, false, _date);
   }
 
   function getTasks () public view returns (Task[] memory) {
@@ -38,6 +35,27 @@ contract TodoList {
     }
 
     return _tasks;
+  }
+
+  function toggleTaskDone(uint _id) public doesTaskExist(_id) {
+    Task storage task = tasks[_id];
+    task.isDone = !task.isDone;
+    task.dateOfCompletion = task.isDone ? block.timestamp : 0;
+
+    emit TaskChanged(_id, task.isDone, task.dateOfCompletion);
+  }
+
+  function deleteTask(uint _id) public doesTaskExist(_id) {
+    delete tasks[_id];
+
+    emit TaskDeleted(_id);
+  }
+
+  modifier doesTaskExist (uint _taskId) {
+    if (tasks[_taskId].id == 0) {
+      revert("Revert: Task does not exist");
+    }
+    _;
   }
 
 }

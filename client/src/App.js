@@ -11,20 +11,18 @@ import Notify from "./components/Notify"
 
 
 const App = () => { 
-  const [msg, setMsg] = useState(['info', ""]);
+  const [msg, setMsg] = useState(['info', ""])
+
   const [{
     network,
     account,
     web3,
     wallet
   }, connectNetwork, disconnectNetwork] = useNetwork({ setMsg })
-  const [{ createTask, setTasks }, tasks] = useContract({ web3, account, setMsg })
 
-  const siledTasks = tasks.slice(1)
-
-  // useEffect(() => {
-  //   console.log('tasks: ---APP ', tasks)
-  // }, [tasks])
+  const [{
+    createTask, setTasks, toggleTaskChange, deleteTask
+  }, tasks] = useContract({ web3, account, setMsg })
 
   return (
     <div className="App">
@@ -32,7 +30,10 @@ const App = () => {
         wallet, account, network, connectNetwork,
         disconnectNetwork, setMsg
       }} />
-      <Main {...{ createTask, setTasks }} tasks={siledTasks} />
+      <Main {...{
+        createTask, setTasks, toggleTaskChange,
+        deleteTask
+        }} tasks={tasks} />
       <SnackbarProvider maxSnack={3}>
         <Notify {...{ msg }} />
       </SnackbarProvider>

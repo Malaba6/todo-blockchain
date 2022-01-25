@@ -3,30 +3,27 @@ import {
   Box, Checkbox, Container, Divider, FormControl,
   IconButton, InputBase, InputLabel, ListItem,
   MenuItem,
-  Select, Typography, Zoom
+  Select, Tooltip, Typography, Zoom
 } from "@mui/material";
 import { DateTimePicker } from "@mui/lab";
 import moment from 'moment'
+import { DeleteOutline } from "@mui/icons-material";
 
 const Task = ({
   isNewTask, selectedItem, task, isDone, setTasks,
   date, handleTaskChange, handleMenuChange, tasks,
   handleDateChange, menuLabels, handleAddTask, id,
-  newTasks: _tasks
+  newTasks: _tasks, toggleTaskChange, deleteTask
 }) => {
-  const hanleTaskDone = () =>
-    setTasks(tasks.map(t => t.id === id 
-      ? { ...t, isDone: !isDone } 
-      : t).sort((a, b) => b.id - a.id))
+  const hanleTaskStatusChange = async () => await toggleTaskChange(id)
+  const handleDeleteTask = async () => await deleteTask(id)
 
   useEffect(() => {
-    // console.log("****** ", _tasks);
     if (_tasks) {
       _tasks.forEach(t => {
         if (t.id !== '0') {
         // Turn timestamp into date
         const newDate = new Date(parseInt(t.date))
-        console.log("****** ", t.date, newDate);
       }})
     }
   }, [_tasks])
@@ -47,15 +44,18 @@ const Task = ({
         borderRadius: '0.7em',
         mb: isNewTask ? 3.5 : 1.5,
       }}>
-        <Checkbox
-          disabled={isNewTask}
-          sx={{
-            '&.Mui-checked': {
-              color: 'info.main',
-            },
-          }}
-          onChange={hanleTaskDone}
-          fontSize="small" />
+        <Tooltip title={isDone ? 'Mark as not done' : 'Mark as done'} placement="top" arrow>
+          <Checkbox
+            disabled={isNewTask}
+            sx={{
+              '&.Mui-checked': {
+                color: 'info.main',
+              },
+            }}
+            onChange={hanleTaskStatusChange}
+            checked={isDone}
+            fontSize="small" />
+        </Tooltip>
         <InputBase sx={{ ml: 1, flex: 1 }}
           onChange={handleTaskChange}
           value={task}
@@ -86,18 +86,27 @@ const Task = ({
               onChange={handleDateChange} />
           : <Box
             sx={{
-              backgroundColor: 'primary.light',
               display: 'flex',
               alignItems: 'center',
-              p: 1,
-              pt: 0,
-              pb: 0,
-              borderRadius: '0.7em',
-
             }}>
-              <Typography>
+              <Typography
+                sx={{
+                  backgroundColor: 'primary.light',
+                  p: 1,
+                  pt: 1,
+                  pb: 1,
+                  mr: 1,
+                  borderRadius: '0.7em',
+                }}>
                 {moment(date).format('D MMM, hh A')}
               </Typography>
+              <Tooltip title="Delete" arrow placement="top">
+                <IconButton
+                  color="info"
+                  onClick={handleDeleteTask}>
+                    <DeleteOutline  />
+                </IconButton>
+              </Tooltip>
           </Box>
         }
         {isNewTask && (

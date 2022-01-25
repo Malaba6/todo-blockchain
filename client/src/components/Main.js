@@ -7,109 +7,51 @@ import moment from 'moment'
 import { TransitionGroup } from 'react-transition-group'
 import { v4 as uuid } from 'uuid'
 import Task from "./Task";
+import { getDatesMenu, sortList } from "../utils";
 
-const Main = ({ createTask, tasks, setTasks }) => {
-  const [selectedItem, setSelectedItem] = useState()
+const Main = ({
+  createTask, tasks, setTasks, toggleTaskChange,
+  deleteTask
+}) => {
+  const [selectedItem, setSelectedItem] = useState(1)
   const [date, setDate] = useState(new Date())
   const [task, setTask] = useState('')
-  // const [tasks, setTasks] = useState(_tasks || [])
   const [when, setWhen] = useState({})
-  console.log('When: ', when)
+  const [tasks_, set_Tasks] = useState([])
+  
   const [menuLabels, setMenuLabels] = useState([{
-    label: 'Sort by Date',
+    label: 'Sort All by Date',
     value: 1
   }])
 
   useEffect(() => {
-    // const sameDateTasks = []
-    // collect all tasks with same when
-    const tempObj = {}
-  
-    tasks.forEach(task_ => {
-      const  whn = task_.when
-      const whenValues = when[task_.when]
-      if (whenValues) {
-        tempObj[whn] = [...whenValues, task_]
-      } else {
-        tempObj[whn] = [task_]
-      }
-
+    getDatesMenu({
+      when, setWhen, tasks,
+      setMenuLabels, menuLabels
     })
-    setWhen(tempObj)
-    // setTasks(sortList([...tasks]))
-  }, [tasks])
+  }, [tasks, menuLabels])
 
   const handleMenuChange = e => {
     setSelectedItem(e.target.value)
     const item = menuLabels.find(l => l.value === e.target.value)
     const { label } = item
+    console.log('Selected item *** ', when[label])
+    const tasks_ = when[label]
 
-    setTasks(when[label])
+    set_Tasks(tasks_ || [])
   }
 
   const handleDateChange = useCallback(newDate => setDate(newDate), [])
 
   const handleTaskChange = e => setTask(e.target.value)
 
-  // Sort tasks by date
-  const sortList = (list) => list.sort((a, b) => b.date - b.date)
-
-  // Check whether task is already in list
-  const isInMenu = (item) => menuLabels.find(l => l.value === item)
-
   const handleAddTask = async() => {
     if (task) {
       const time = date < new Date() ? new Date() : date
-      const day = moment(time).calendar()
-      const timeLapse = moment(time).fromNow()
-      let when_ = ''
-  
-      const newTask = {
-        id: uuid(),
-        task,
-        date: time,
-        isDone: false,
-      }
+      const dateInSeconds = moment(time).valueOf()
 
-      if (day.indexOf('Today') !== -1) {
-        when_ = 'Today'
-        setWhen({
-          ...when,
-          Today: when?.Today ? sortList([...when.Today, newTask]) : [newTask]
-        })
+      await createTask(task, dateInSeconds)
 
-        !isInMenu('Today') && setMenuLabels([...menuLabels, {
-          label: 'Today', value: menuLabels.length + 1
-        }])
-      } else if (day.indexOf('Tomorrow') !== -1) {
-        when_ = 'Tomorrow'
-        setWhen({
-          ...when,
-          Tomorrow: when?.Tomorrow ? sortList([...when.Tomorrow, newTask]) : [newTask]
-        })
-
-        !isInMenu("Tomorrow") && setMenuLabels([...menuLabels, {
-          label: 'Tomorrow', value: menuLabels.length + 1
-        }])
-      } else {
-        when_ = timeLapse
-        setWhen({
-          ...when,
-          [timeLapse]: when[timeLapse]
-            ? sortList([...when[timeLapse], newTask]) 
-            : [newTask]
-        })
-
-        !isInMenu(timeLapse) && setMenuLabels([...menuLabels, {
-          label: timeLapse, value: menuLabels.length + 1
-        }])
-
-      }
-      newTask[when_] = when_
-      setTasks(sortList([...tasks, newTask]))
-      const dateInSeconds = moment(time).unix()
-      console.log('dateInSeconds: ', dateInSeconds)
-      await createTask(task, dateInSeconds, when_)
       setTask('')
     }
   }
@@ -119,6 +61,8 @@ const Main = ({ createTask, tasks, setTasks }) => {
       : hour < 16 ? 'Good afternoon'
       : 'Good evening'
   }
+
+  const tasks__ = tasks_.length ? tasks_ : sortList(tasks)
   
   return (
     <Box sx={{
@@ -163,7 +107,7 @@ const Main = ({ createTask, tasks, setTasks }) => {
           handleAddTask={handleAddTask}
           menuLabels={menuLabels} />
         <TransitionGroup>
-          {tasks.map(({id, content, date, isDone}) => id !== '0'
+          {tasks__.map(({id, content, date, isDone}) => id !== '0'
             ? (<Collapse key={id}>
                 <Task
                   key={id}
@@ -173,7 +117,8 @@ const Main = ({ createTask, tasks, setTasks }) => {
                   isDone={isDone}
                   tasks={tasks}
                   setTasks={setTasks}
-                  // newTasks={_tasks || []}
+                  deleteTask={deleteTask}
+                  toggleTaskChange={toggleTaskChange}
                   handleDateChange={handleDateChange} />
                 </Collapse>)
             : null
