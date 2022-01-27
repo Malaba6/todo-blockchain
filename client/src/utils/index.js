@@ -47,7 +47,6 @@ export const getDatesMenu = ({
   when, setWhen, tasks,
   setMenuLabels, menuLabels
 }) => {
-  console.log('Called ^^^ ', tasks)
   let tempWhen = {}
   let tempMenuLabels = menuLabels
 

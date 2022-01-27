@@ -1,19 +1,32 @@
 import { useState } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Box from '@mui/material/Box'
+import { useTheme } from '@mui/material/styles'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { Grid, TextField } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { Send } from '@mui/icons-material'
 
 export default function ButtonAppBar({
   wallet, network, account, isConnected,
   connectNetwork, disconnectNetwork, setMsg
 }) {
+  const theme = useTheme()
+
   const [loading, setLoading] = useState(false)
   const [isConnBtnOn, setIsConnBtnOn] = useState(true)
+
+  const logoColors = theme.palette.mode === 'light'
+    ? `0px 3px 0px #BBDEFB,
+      0px 14px 10px rgba(13,71,161, 0.1),
+      0px 24px 2px rgba(13,71,161, 0.1),
+      0px 34px 30px rgba(13,71,161, 0.1)` 
+    : `0px 3px 0px #BBDEFB,
+      0px 14px 10px rgba(200,200,200, 0.1),
+      0px 24px 2px rgba(200,200,200, 0.1),
+      0px 34px 30px rgba(200,200,200, 0.1)`
+
 
   const handleWalletInfoChange = (e) => {
     console.log(e.target.value);
@@ -66,27 +79,29 @@ export default function ButtonAppBar({
             <Grid container item 
               justifyContent='flex-start'
               alignItems='flex-start'
-               xs={6}>
+               xs={4}>
               <Typography
                 color="secondary.main"
                 sx={{
+                  // backgroundColor: '#333',
                   fontSize: '1.5rem',
                   fontWeight: 900,
-                  textShadow: `0px 3px 0px #BBDEFB,
-                  0px 14px 10px rgba(13,71,161, 0.1),
-                  0px 24px 2px rgba(13,71,161, 0.1),
-                  0px 34px 30px rgba(13,71,161, 0.1)`,
+                  textShadow: logoColors,
                   lineHeight: 1,
                   fontStyle: 'italic',
                 }}>
                 TACHE
               </Typography>
             </Grid>
-            <Grid container xs={6} direction='row'>
+            <Grid container xs={8} direction='row'>
               <Grid
                 container
                 item
-                xs={10}>
+                md={10}
+                sm={8}
+                sx={{
+                  display: { xs: 'none', sm: 'flex' },
+                }}>
                 <TextField 
                   id="wallet-info"
                   label="Connection Info: Wallet/ChainID NetworkID (Network TYpe)/Account"
@@ -107,7 +122,8 @@ export default function ButtonAppBar({
                 container 
                 item
                 justifyContent={'flex-end'}
-                xs={2}
+                sm={4}
+                md={2}
                 >
                 <LoadingButton
                   color="inherit"

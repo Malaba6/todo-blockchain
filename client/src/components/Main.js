@@ -1,18 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  Box, Grid, Slide, Typography, Collapse
+  Box, Grid, Slide, Typography, Collapse, IconButton, Tooltip
 } from "@mui/material";
-import { BlurCircular } from "@mui/icons-material";
+import { useTheme } from '@mui/material/styles'
+import { BlurCircular, Brightness7, Brightness4 } from "@mui/icons-material"
 import moment from 'moment'
 import { TransitionGroup } from 'react-transition-group'
 import { v4 as uuid } from 'uuid'
-import Task from "./Task";
-import { getDatesMenu, sortList } from "../utils";
+import Task from "./Task"
+import { getDatesMenu, sortList } from "../utils"
+import { useDarkMode } from "../hooks/useDarkMode";
 
 const Main = ({
   createTask, tasks, setTasks, toggleTaskChange,
   deleteTask
 }) => {
+  const theme = useTheme()
+  const { toggleColorMode } = useDarkMode()
+
   const [selectedItem, setSelectedItem] = useState(1)
   const [date, setDate] = useState(new Date())
   const [task, setTask] = useState('')
@@ -35,7 +40,7 @@ const Main = ({
     setSelectedItem(e.target.value)
     const item = menuLabels.find(l => l.value === e.target.value)
     const { label } = item
-    console.log('Selected item *** ', when[label])
+
     const tasks_ = when[label]
 
     set_Tasks(tasks_ || [])
@@ -66,7 +71,7 @@ const Main = ({
   
   return (
     <Box sx={{
-      height: 'calc(100vh - 64px)',
+      height: '100%',
       mt: 4,
       mb: 4,
     }}>
@@ -75,7 +80,7 @@ const Main = ({
         m: '0 auto',
         mb: 8,
       }}>
-        <Grid container item xs={1}
+        <Grid container item xs={2} sm={1}
           justifyContent='center'>
           <BlurCircular fontSize="large" sx={{
             color: 'secondary.main',
@@ -83,7 +88,7 @@ const Main = ({
         </Grid>
         <Grid container direction='column' item
           alignItems="flex-start"
-          xs={11}>
+          xs={10} sm={11}>
             <Typography variant="h4">
               {`${getGreetings(moment().hour())}, Champion`}</Typography>
             <Typography
@@ -124,6 +129,22 @@ const Main = ({
             : null
             )}
         </TransitionGroup>
+      </Box>
+      <Box>
+        <Tooltip title={theme.palette.mode === 'dark' ? 'Change to Light Mode' : 'Change to Dark Mode'}>
+          <IconButton
+            onClick={toggleColorMode}
+            sx={{
+              bottom: 0,
+              left: 0,
+              position: 'fixed',
+            }}>
+            {theme.palette.mode === 'light'
+              ? <Brightness7 />
+              : <Brightness4 />
+            }
+          </IconButton>
+        </Tooltip>
       </Box>
     </Box>
   )
